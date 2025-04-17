@@ -1,0 +1,18 @@
+# small_flow/docker/compose/docker-compose.db.yml
+
+version: '3.8'
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=user
+      - POSTGRES_DB=airflow
+    volumes:
+      - postgress_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retires: 5
+    networks:
+      - airflow_network

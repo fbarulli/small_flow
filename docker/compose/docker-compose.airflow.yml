@@ -1,0 +1,46 @@
+# small_flow/docker/compose/docker-compose.airflow.yml
+version: '3.8'
+
+services:
+  airflow-init:
+    <<: *airflow-common
+    build:
+      context: ../../airflow
+      dockerfile: Dockerfile.Base
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: /bin/bash
+    command: >
+      -c "airflow db init &&
+          airflow user create \
+            --username user   \
+            --firstname User  \
+            --lastname User   \
+            --role Admin      \
+            --email no@ex.com \
+            --password user   "
+
+airflow-webserver:
+  <<: *airflow-common
+  depends_on:
+    airflow-init:
+      condition: service_completed_successfully
+  ports:
+    - "8080:8080"
+  command: webserver
+  healthcheck:
+    test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+    interval: 10s
+    retries: 5
+
+airflow-scheduler:
+  <<: *airflow-common
+  depends_on:
+    airflow-init:
+      condition: service_completed_successfully
+    command: scheduler
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob", --local]
+      interval: 10s
+      retries: 5

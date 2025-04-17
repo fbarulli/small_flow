@@ -1,0 +1,9 @@
+# small_flow/docker/compose/docker-compose.yml
+version: '3.8'
+services:
+  
+networks:
+  airflow_network:
+    driver: bridge
+volumes:
+  postgres_data:
