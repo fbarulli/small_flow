@@ -1,16 +1,11 @@
 # small_flow/docker/compose/docker-compose.base.yml
 
+# This file must contain valid YAML for merging.
+# Even if it defines nothing else, the version key is needed.
 
-version: '3.8'
-x-airflow-common: &airflow-common
-  image: custom-airflow:2.9.2
-  environment:
-    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-    - AIRFLOW__CORE__LOAD_EXAMPLES=False
-  volumes:
-    - ../dags:/opt/airflow/dags
-    - ../logs:/opt/airflow/logs
-    - ../plugins:/opt/airflow/plugins
-  networks:
-    - airflow_network
+
+# You could add empty services, networks, or volumes keys if desired,
+# but just version is enough to clear the 'NoneType' error.
+# services: {}
+# networks: {}
+# volumes: {}

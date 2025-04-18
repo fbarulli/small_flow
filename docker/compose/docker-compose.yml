@@ -1,9 +1,14 @@
 # small_flow/docker/compose/docker-compose.yml
 version: '3.8'
-services:
-  
+
+# Anchor definition removed as config is duplicated in airflow.yml
+
+# Explicitly define services as an empty mapping for merging
+services: {}
+
 networks:
   airflow_network:
     driver: bridge
+
 volumes:
   postgres_data:

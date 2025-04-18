@@ -1,12 +1,25 @@
 # small_flow/docker/compose/docker-compose.airflow.yml
-version: '3.8'
 
 services:
   airflow-init:
-    <<: *airflow-common
-    build:
-      context: ../../airflow
+    # Removed: <<: *airflow-common
+    # START Duplicated Common Config
+    image: custom-airflow:2.9.2 # Image name to use for the built image
+    build: # Build instruction (moved from anchor definition)
+      context: ../../airflow # Context is relative to the location of this compose file (docker/compose)
       dockerfile: Dockerfile.Base
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    volumes:
+      # Volumes (moved from anchor definition)
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    networks: # Reference network defined in docker-compose.yml
+      - airflow_network
+    # END Duplicated Common Config
     depends_on:
       postgres:
         condition: service_healthy
@@ -22,10 +35,26 @@ services:
             --password user"
 
   airflow-webserver:
-    <<: *airflow-common
+    # Removed: <<: *airflow-common
+    # START Duplicated Common Config
+    image: custom-airflow:2.9.2
+    build: # Build instruction (moved from anchor definition)
+      context: ../../airflow
+      dockerfile: Dockerfile.Base
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    networks:
+      - airflow_network
+    # END Duplicated Common Config
     depends_on:
       airflow-init:
-        condition: service_completed_successfully
+        condition: service_completed_successfully # Valid with Docker Compose V2+
     ports:
       - "8080:8080"
     command: webserver
@@ -35,10 +64,26 @@ services:
       retries: 5
 
   airflow-scheduler:
-    <<: *airflow-common
+    # Removed: <<: *airflow-common
+    # START Duplicated Common Config
+    image: custom-airflow:2.9.2
+    build: # Build instruction (moved from anchor definition)
+      context: ../../airflow
+      dockerfile: Dockerfile.Base
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    networks:
+      - airflow_network
+    # END Duplicated Common Config
     depends_on:
       airflow-init:
-        condition: service_completed_successfully
+        condition: service_completed_successfully # Valid with Docker Compose V2+
     command: scheduler
     healthcheck:
       test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --local"]
